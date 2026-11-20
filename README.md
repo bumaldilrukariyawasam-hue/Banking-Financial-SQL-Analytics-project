@@ -1,62 +1,101 @@
 # Banking & Financial Analytics — SQL Portfolio Project
 
-**PostgreSQL portfolio project using a synthetic banking dataset.**
+**PostgreSQL portfolio project using a fictional banking dataset.**
 
-> All customer, account, loan, transaction and monetary records in this repository are synthetic and fictional. They are provided for educational use only and do not represent any real bank or customer.
+> **Synthetic data notice:** All customer, account, loan, transaction, date and monetary records in the companion dataset archive are synthetic and fictional. They do not represent a real bank, real customers, or actual banking performance.
 
 ## Project overview
 
-A PostgreSQL and SQL portfolio project exploring customer accounts, loan portfolios, transaction activity and repayment trends. The project demonstrates relational database design, data validation, joins, aggregations, CTEs, CASE expressions and window functions.
+This project demonstrates relational database design and analytical SQL using PostgreSQL and pgAdmin 4. It explores customer and account relationships, loan portfolio composition, transaction activity, loan repayment trends and illustrative customer balance segments.
 
-## Dataset
+## Dataset profile
 
-| Table | Records |
-|---|---:|
-| customers | 800 |
-| accounts | 1,024 |
-| loans | 430 |
-| transactions | 15,000 |
-| **Total** | **17,254** |
+| Table | Expected rows | Primary key |
+|---|---:|---|
+| `banking.customers` | 800 | `customer_id` |
+| `banking.accounts` | 1,024 | `account_id` |
+| `banking.loans` | 430 | `loan_id` |
+| `banking.transactions` | 15,000 | `transaction_id` |
+| **Total** | **17,254** | |
 
-All account and transaction values are in LKR in this synthetic training dataset.
+All account and transaction values use LKR in this synthetic training dataset.
+
+**Dataset upload note:** The four CSV source files are included in the companion SQL-only ZIP package, but have not yet been committed to this GitHub repository. Extract the package and upload `customers.csv`, `accounts.csv`, `loans.csv` and `transactions.csv` into `Dataset/` to make the repository fully reproducible. `Dataset/README.md` contains the upload reminder.
+
+## Database relationships
+
+- One customer may own multiple accounts and have multiple loans.
+- Each account belongs to one customer.
+- Each loan references a customer and a servicing account.
+- Each transaction references an account. `loan_id` is nullable and is populated for Loan Repayment transactions in this dataset.
+
+## SQL skills demonstrated
+
+- PostgreSQL schema and table creation
+- Primary keys, foreign keys, `NOT NULL`, `CHECK` constraints and indexes
+- Data validation, row-count checks, NULL checks and orphan-reference checks
+- Filtering and sorting with `WHERE`, `ORDER BY` and `LIMIT`
+- Aggregations using `COUNT`, `SUM`, `AVG` and `GROUP BY`
+- Conditional logic with `CASE WHEN`
+- Relational joins: `INNER JOIN` and `LEFT JOIN`
+- CTEs (`WITH`) and multiple CTEs
+- Window functions: `RANK`, `DENSE_RANK`, `LAG` and cumulative `SUM() OVER()`
+- Monthly repayment analysis and month-over-month percentage change
 
 ## Repository structure
 
-- `Dataset/` — four synthetic CSV files.
-- `SQL/` — database setup, data quality checks, customer analysis, transaction analysis, loan portfolio analysis and advanced SQL.
-- `Documentation/` — data dictionary, pgAdmin import guide, project findings and start guide.
-- `Screenshots/` — selected pgAdmin query output evidence.
-
-## Skills demonstrated
-
-PostgreSQL, relational database design, primary and foreign keys, constraints and indexes, data quality checks, joins, aggregations, CASE WHEN, CTEs, RANK, DENSE_RANK, LAG, cumulative SUM window functions, monthly repayment analysis and customer/loan segmentation.
+```text
+Dataset/          Upload the four CSV files from the companion ZIP here
+SQL/              Six PostgreSQL setup, validation and analysis scripts
+Documentation/    Data dictionary, pgAdmin import guide and findings
+Screenshots/      Folder for selected pgAdmin query output evidence
+README.md
+```
 
 ## Getting started
 
-1. Create a PostgreSQL database (for example `banking_analytics`).
-2. Run `SQL/01_database_setup.sql` in pgAdmin Query Tool.
-3. Import the four CSV files into the `banking` schema in this order: customers, accounts, loans, transactions. Enable Header, use comma delimiter and UTF-8.
-4. Run `SQL/02_data_quality_checks.sql` and verify the row counts.
-5. Explore the analysis scripts in `SQL/03` through `SQL/06`.
+### If your database is already populated
 
-See `Documentation/START_HERE.md`, `Documentation/PGADMIN_IMPORT_GUIDE.md` and `Documentation/DATA_DICTIONARY.md` for instructions.
+Open pgAdmin Query Tool for your existing database and run `SQL/02_data_quality_checks.sql`. If the expected records are present, continue with `SQL/03_customer_analysis.sql` through `SQL/06_advanced_sql.sql`. Do not re-import the CSVs into already-populated tables.
 
-## Selected findings
+### If you are setting up from scratch
 
-Results below are descriptive observations from the included synthetic dataset and the author's PostgreSQL analysis:
+1. Install PostgreSQL and pgAdmin 4.
+2. Create a PostgreSQL database (the database name is your choice).
+3. Open Query Tool for that database.
+4. Run `SQL/01_database_setup.sql` to create the `banking` schema and four related tables.
+5. Extract the companion ZIP and upload/import the four CSV files in this order: customers, accounts, loans, transactions.
+6. In pgAdmin's Import/Export dialog, select Import and CSV; enable **Header**; use comma as delimiter and UTF-8 encoding.
+7. Run `SQL/02_data_quality_checks.sql` and verify the expected row counts.
+8. Explore the analysis scripts from `SQL/03` through `SQL/06`.
+
+See `Documentation/PGADMIN_IMPORT_GUIDE.md` and `Documentation/DATA_DICTIONARY.md` for details.
+
+## Selected findings from the author's SQL outputs
+
+The following are descriptive results observed while analysing the supplied synthetic data:
 
 - 328 customers had at least one loan record; 472 had no loan record.
-- Account statuses: 912 Active, 74 Dormant and 38 Closed.
-- Illustrative active-balance segments: 589 High Balance, 126 Medium Balance, 23 Low Balance and 62 No Active Account.
+- Accounts: 912 Active, 74 Dormant and 38 Closed.
+- Active-account customer segmentation, using illustrative balance thresholds: 589 High Balance, 126 Medium Balance, 23 Low Balance and 62 No Active Account customers.
 - Loan statuses: 319 Current, 29 Overdue, 17 Defaulted, 5 Pending and 60 Closed.
-- Total loan principal: LKR 1,586,446,366.66; total outstanding: LKR 697,415,118.48.
-- Overdue and Defaulted exposure: 46 loans and LKR 94,891,792.19 outstanding (13.61% of total outstanding). This is not a regulatory NPL ratio.
+- Total loan principal: LKR 1,586,446,366.66; total outstanding balance: LKR 697,415,118.48.
+- Combined Overdue and Defaulted exposure: 46 loans, LKR 94,891,792.19 outstanding (13.61% of total outstanding). This is a descriptive sample indicator, not a regulatory NPL ratio.
+- Monthly repayment analysis covered January 2024 to October 2026 (34 months); October 2026 was the highest month in the top-five query, with 201 repayments totalling LKR 8,858,088.48.
 
-## Limitations
+Detailed notes are in `Documentation/PROJECT_FINDINGS.md`.
 
-This is synthetic educational data, not real financial institution data. Customer and loan segments use illustrative thresholds, not official bank policies. The combined overdue/defaulted exposure is a descriptive training indicator, not an official NPL ratio. Transaction amounts are positive magnitudes; interpret them by transaction type and do not treat their sum as revenue or profit.
+## Limitations and responsible interpretation
+
+- This is a synthetic educational dataset, not an analysis of a real financial institution.
+- High/Medium/Low customer balance groups and loan principal bands use illustrative thresholds, not official bank policies.
+- Overdue/defaulted exposure is a descriptive training indicator, not a regulatory non-performing-loan ratio.
+- `current_balance` is a snapshot, not a historical daily balance series.
+- Transaction `amount` values are positive magnitudes. Do not sum all transaction types and describe the result as revenue, profit or net cash flow. Interpret amounts in context using `transaction_type`.
 
 ## Author
 
-Bumal Kariyawasam  
+**Bumal Kariyawasam**  
+Statistics graduate | Aspiring Data Analyst & Data Scientist  
+LinkedIn: https://www.linkedin.com/in/bumal-kariyawasam-4052b1247/  
 GitHub: https://github.com/bumaldilrukariyawasam-hue
